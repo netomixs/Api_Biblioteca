@@ -8,6 +8,7 @@ use App\GenericClass\HttpCode;
 use Illuminate\Http\Request;
 use Exception;
 use App\Models\EditorialModel;
+use Illuminate\Validation\Validator;
 
 class EditorialController extends BaseController
 {
@@ -39,14 +40,21 @@ class EditorialController extends BaseController
     {
         $respuesta = new Respuesta();
         try {
-            if ($request->has(["Nombre", "Pais"])) {
+            $rules = [
+                'Nombre' => 'required',
+                'Pais' => 'required|min:6',
+            ];
+            $validator = Validator($request->all(), $rules);
+
+            //  if ($request->has(["Nombre", "Pais"])) {
+            if (!$validator->fails()) {
                 $data = new EditorialModel();
                 $data->Nombre = $request->Nombre;
                 $data->Pais = $request->Pais;
                 $response = $data->save();
                 $respuesta->RespuestaInsert($response, $data->id);
             } else {
-                $respuesta->RespuestaDatosIncompletos($request->all());
+                $respuesta->RespuestaDatosIncompletos($validator->errors()->toArray() );
             }
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
@@ -58,15 +66,21 @@ class EditorialController extends BaseController
     {
         $respuesta = new Respuesta();
         try {
-            if ($request->has(["Nombre", "Pais"])) {
+            $rules = [
+                'Nombre' => 'required',
+                'Pais' => 'required|min:6',
+            ];
+            $validator = Validator($request->all(), $rules);
+          //  if ($request->has(["Nombre", "Pais"])) {
+            if (!$validator->fails()) {
                 $data = EditorialModel::findOrFail($id);
                 $data->Nombre = $request->Nombre;
                 $data->Pais = $request->Pais;
-                $data->id=$id;
+                $data->id = $id;
                 $response = $data->save();
                 $respuesta->RespuestaUpdate($response, $data);
             } else {
-                $respuesta->RespuestaDatosIncompletos($request->all());
+                $respuesta->RespuestaDatosIncompletos($validator->errors()->toArray());
             }
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
@@ -79,7 +93,7 @@ class EditorialController extends BaseController
         $respuesta = new Respuesta();
         try {
             $data = EditorialModel::findOrFail($id);
-            $data->id=$id;
+            $data->id = $id;
             $response = $data->delete();
             $respuesta->RespuestaDelete($response, $data);
         } catch (Exception $e) {

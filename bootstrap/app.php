@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
     dirname(__DIR__)
@@ -25,7 +25,7 @@ $app = new Laravel\Lumen\Application(
 
 $app->withFacades();
 
- $app->withEloquent();
+$app->withEloquent();
 
 /*
 |--------------------------------------------------------------------------
@@ -58,7 +58,7 @@ $app->singleton(
 | the default version. You may register other files below as needed.
 |
 */
-
+$app->configure('swagger-lume');
 $app->configure('app');
 
 /*
@@ -94,7 +94,7 @@ $app->configure('app');
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
-
+$app->register(\SwaggerLume\ServiceProvider::class);
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes
@@ -109,8 +109,7 @@ $app->configure('app');
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
 ], function ($router) {
-    require __DIR__.'/../routes/web.php';
- 
+    require __DIR__ . '/../routes/web.php';
 });
 
 return $app;

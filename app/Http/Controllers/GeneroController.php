@@ -34,6 +34,19 @@ class GeneroController extends BaseController
         }
         return $respuesta->toJson();
     }
+    public function getGenero($id)
+    {
+        $respuesta = new Respuesta();
+        try {
+            $data = GeneroModel::find($id);
+            $data->load('libro');
+
+            $respuesta->RespuestaGet($data);
+        } catch (Exception $e) {
+            $respuesta->RespuestaBadRequest(null, $e);
+        }
+        return $respuesta->toJson();
+    }
 
     public function insert(Request $request)
     {
@@ -62,7 +75,7 @@ class GeneroController extends BaseController
                 $data = GeneroModel::findOrFail($id);
                 $data->Nombre = $request->Nombre;
                 $data->Codigo = $request->Codigo;
-                $data->id=$id;
+                $data->id = $id;
                 $response = $data->save();
                 $respuesta->RespuestaUpdate($response, $data);
             } else {
@@ -79,7 +92,7 @@ class GeneroController extends BaseController
         $respuesta = new Respuesta();
         try {
             $data = GeneroModel::findOrFail($id);
-            $data->id=$id;
+            $data->id = $id;
             $response = $data->delete();
             $respuesta->RespuestaDelete($response, $data);
         } catch (Exception $e) {

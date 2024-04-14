@@ -9,6 +9,7 @@ use App\GenericClass\Respuesta;
 use App\GenericClass\HttpCode;
 use App\Models\LibroModel;
 use Illuminate\Http\Request;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use Exception;
 
 class AutorController extends BaseController
@@ -66,11 +67,16 @@ class AutorController extends BaseController
             $dataInsert = new AutorModel();
             $dataInsert->Id_Persona = $request->Id_Persona;
             $dataInsert->Codigo = $request->Codigo;
-            if ($request->has(["Id_Persona", "Codigo"])) {
+            $rules = [
+                'Id_Persona' => 'required',
+                'Codigo' => 'required',
+            ];
+            $validator = Validator($request->all(), $rules);
+            if (!$validator->fails()) {
                 $isInsert = $dataInsert->save();
                 $respuesta->RespuestaInsert($isInsert, $dataInsert->id);
             } else {
-                $respuesta->RespuestaDatosIncompletos($dataInsert);
+                $respuesta->RespuestaDatosIncompletos($validator->errors()->toArray());
             }
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
@@ -78,17 +84,21 @@ class AutorController extends BaseController
         return response(json_encode($respuesta));
     }
     public function update(Request $request, $id)
-    { 
+    {
         $respuesta = new Respuesta();
         try {
             $dataInsert =  AutorModel::findOrFail($id);
             $dataInsert->Codigo = $request->Codigo;
             $dataInsert->id = $id;
-            if ($request->has(["Codigo"])) {
+            $rules = [
+                'Codigo' => 'required',
+            ];
+            $validator = Validator($request->all(), $rules);
+            if (!$validator->fails()) {
                 $isInsert = $dataInsert->save();
                 $respuesta->RespuestaUpdate($isInsert, $dataInsert);
             } else {
-                $respuesta->RespuestaDatosIncompletos($dataInsert);
+                $respuesta->RespuestaDatosIncompletos($validator->errors()->toArray());
             }
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
@@ -100,11 +110,23 @@ class AutorController extends BaseController
         $respuesta = new Respuesta();
 
         try {
-            $dataInsert =new AutorModel();
+            $dataInsert = new AutorModel();
             $dataInsert =  AutorModel::findOrFail($id);
             $dataInsert->id = $id;
             $isSucees = $dataInsert->delete();
             $respuesta->RespuestaDelete($isSucees, $dataInsert);
+        } catch (Exception $e) {
+            $respuesta->RespuestaBadRequest(null, $e);
+        }
+        return response(json_encode($respuesta));
+    }
+    public function getLibros($id)
+    {
+        $respuesta = new Respuesta();
+        try {
+
+            $data = AutorModel::with("libro")->find($id);
+            $respuesta->RespuestaGet($data);
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }

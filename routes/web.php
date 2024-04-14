@@ -15,7 +15,7 @@ use App\Http\Controllers\LibroController;
 |
 */
 
-$router->get('/libro', function () use ($router) {
+$router->get('/', function () use ($router) {
 
     return "Hola mundo";
 });
@@ -23,6 +23,7 @@ $router->get('/libro', function () use ($router) {
 $router->get("/autor","AutorController@getAll");
 $router->get("/autor/persona","AutorController@getAllWithPerson");
 $router->get("/autor/{id}","AutorController@get");
+$router->get("/autor/{id}/libro","AutorController@getLibros");
 $router->get("/autor/{id}/persona","AutorController@getWithPerson");
 $router->post("/autor","AutorController@insert");
 $router->post("/autor/{id}","AutorController@update");
@@ -52,6 +53,7 @@ $router->delete("/editorial/{id}","EditorialController@delete");
 //Genero
 $router->get("/genero","GeneroController@getAll");
 $router->get("/genero/{id}","GeneroController@get");
+$router->get("/genero/{id}/libro","GeneroController@getGenero");
 $router->post("/genero","GeneroController@insert");
 $router->post("/genero/{id}","GeneroController@update");
 $router->delete("/genero/{id}","GeneroController@delete");

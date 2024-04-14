@@ -13,6 +13,6 @@ class GeneroModel extends Model
     protected $table = 'genero';
     public function libro()
     {
-        return $this->belongsToMany(LibroModel::class, 'generoXLibro', 'Id_Genero', 'Id_Libro',"Id","Id");
+        return $this->belongsToMany(LibroModel::class, 'libroxgenero', 'Id_Genero', 'Id_Libro',"Id","Id");
     }
 }

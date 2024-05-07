@@ -8,7 +8,7 @@ use App\GenericClass\HttpCode;
 use Illuminate\Http\Request;
 use Exception;
 use App\Models\GeneroModel;
-
+use Illuminate\Validation\Validator;
 class GeneroController extends BaseController
 {
     public function getAll()
@@ -52,14 +52,20 @@ class GeneroController extends BaseController
     {
         $respuesta = new Respuesta();
         try {
-            if ($request->has(["Nombre", "Codigo"])) {
+            $rules = [
+                'Nombre' => 'required',
+                'Codigo' => 'required|size:3',
+            ];
+            $validator = Validator($request->all(), $rules);
+            $validator->errors()->toArray();
+            if (!$validator->fails()) {
                 $data = new GeneroModel();
                 $data->Nombre = $request->Nombre;
                 $data->Codigo = $request->Codigo;
                 $response = $data->save();
                 $respuesta->RespuestaInsert($response, $data->id);
             } else {
-                $respuesta->RespuestaDatosIncompletos($request->all());
+                $respuesta->RespuestaDatosIncompletos($validator->errors());
             }
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
@@ -71,7 +77,13 @@ class GeneroController extends BaseController
     {
         $respuesta = new Respuesta();
         try {
-            if ($request->has(["Nombre", "Codigo"])) {
+            $rules = [
+                'Nombre' => 'required',
+                'Codigo' => 'required|size:3',
+            ];
+            $validator = Validator($request->all(), $rules);
+            $validator->errors()->toArray();
+            if (!$validator->fails()) {
                 $data = GeneroModel::findOrFail($id);
                 $data->Nombre = $request->Nombre;
                 $data->Codigo = $request->Codigo;
@@ -79,7 +91,7 @@ class GeneroController extends BaseController
                 $response = $data->save();
                 $respuesta->RespuestaUpdate($response, $data);
             } else {
-                $respuesta->RespuestaDatosIncompletos($request->all());
+                $respuesta->RespuestaDatosIncompletos($validator->errors());
             }
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);

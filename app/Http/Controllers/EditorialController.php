@@ -54,7 +54,7 @@ class EditorialController extends BaseController
                 $response = $data->save();
                 $respuesta->RespuestaInsert($response, $data->id);
             } else {
-                $respuesta->RespuestaDatosIncompletos($validator->errors()->toArray() );
+                $respuesta->RespuestaDatosIncompletos($validator->errors() );
             }
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);

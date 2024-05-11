@@ -2,149 +2,129 @@
 
 namespace App\Http\Controllers;
 
-
+use Exception;
 use Laravel\Lumen\Routing\Controller as BaseController;
 use App\Models\PersonaModel;
 use Illuminate\Http\Request;
-
-
 use App\GenericClass\Respuesta;
 use App\GenericClass\HttpCode;
 
 class PersonaController extends BaseController
 {
+    /**
+     * Obten una lista de todas las personas
+     */
     function  getAll()
     {
-        $resquesta = new Respuesta();
-        $data = PersonaModel::all();
-        if ($data->count() > 0) {
-            $resquesta->Code = 200;
-            $resquesta->CodeDesc = HttpCode::getMessageForCode(200);
-            $resquesta->Data = $data;
-            $resquesta->IsSuccess = true;
-            $resquesta->Message = "Consulta exitosa";
-        } else {
-            $resquesta->Code = 204;
-            $resquesta->CodeDesc = HttpCode::getMessageForCode(204);;
-            $resquesta->Data = null;
-            $resquesta->IsSuccess = true;
-            $resquesta->Message = "No hay datos";
+        $respuesta = new Respuesta();
+        try {
+            $data = PersonaModel::all();
+            $respuesta->RespuestaGet($data);
+        } catch (Exception $e) {
+            $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($resquesta));
+  return $respuesta->toJson();
     }
     /**
      * Obten un registro por id
-     * @param Request $Id	
+     * @param int $Id	Id del registro
      */
     function  get($id)
     {
-        $resquesta = new Respuesta();
-        $data = PersonaModel::find($id);
-        if ($data->count() > 0) {
-            $resquesta->Code = 200;
-            $resquesta->CodeDesc = HttpCode::getMessageForCode(200);
-            $resquesta->Data = $data;
-            $resquesta->IsSuccess = true;
-            $resquesta->Message = "Consulta exitosa";
-        } else {
-            $resquesta->Code = 204;
-            $resquesta->CodeDesc = HttpCode::getMessageForCode(204);;
-            $resquesta->Data = null;
-            $resquesta->IsSuccess = true;
-            $resquesta->Message = "No hay datos";
+        $respuesta = new Respuesta();
+        try {
+            $data = PersonaModel::find($id);
+            $respuesta->RespuestaGet($data);
+        } catch (Exception $e) {
+            $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($resquesta));
+  return $respuesta->toJson();
     }
+    /**
+     * Insertar persona en la base de datos
+     * @param Request $request {Nombre,Apellido_P,Apellido_M,Nacimiento,Sexo}
+     */
     function insert(Request $request)
     {
         $respuesta = new Respuesta();
-        $dataInsert = new PersonaModel();
-        $dataInsert->Nombre = $request->Nombre;
-        $dataInsert->Apellido_P = $request->Apellido_P;
-        $dataInsert->Apellido_M = $request->Apellido_M;
-        $dataInsert->Nacimiento = $request->Nacimiento;
-        $dataInsert->Sexo = $request->Sexo;
-        if ($request->has(["Nombre", "Apellido_P", "Nacimiento", "Sexo"])) {
-
-
-            if ($dataInsert->save()) {
-                $respuesta->Code = 202;
-                $respuesta->CodeDesc = HttpCode::getMessageForCode(202);
-                $respuesta->Data =  $dataInsert->id;
-                $respuesta->IsSuccess = true;
-                $respuesta->Message = "Inserción exitosa";
+        try {
+            $rules = [
+                'Nombre' => 'required',
+                'Apellido_P' => 'required',
+                'Nacimiento' => 'required',
+                'Sexo' => 'required|size:1',
+            ];
+            $validator = Validator($request->all(), $rules);
+            $validator->errors()->toArray();
+            if (!$validator->fails()) {
+                $dataInsert = new PersonaModel();
+                $dataInsert->Nombre = $request->Nombre;
+                $dataInsert->Apellido_P = $request->Apellido_P;
+                $dataInsert->Apellido_M = $request->Apellido_M;
+                $dataInsert->Nacimiento = $request->Nacimiento;
+                $dataInsert->Sexo = $request->Sexo;
+                $response = $dataInsert->save();
+                $respuesta->RespuestaInsert($response, $dataInsert->id);
             } else {
-                $respuesta->Code = 406;
-                $respuesta->CodeDesc = HttpCode::getMessageForCode(406);;
-                $respuesta->Data = null;
-                $respuesta->IsSuccess = true;
-                $respuesta->Message = "Error al insertar";
+                $respuesta->RespuestaDatosIncompletos($validator->errors());
             }
-        } else {
-            $respuesta->Code = 406;
-            $respuesta->CodeDesc = HttpCode::getMessageForCode(406);;
-            $respuesta->Data = $dataInsert;
-            $respuesta->IsSuccess = true;
-            $respuesta->Message = "Datos insuficientes";
+        } catch (Exception $e) {
+            $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+        return $respuesta->toJson();
     }
+    /**
+     * Actualizar datos de una persona
+     * @param Request $request {Nombre,Apellido_P,Apellido_M,Nacimiento,Sexo}
+     * @param int $id Id de la persona
+     */
     function update(Request $request, $id)
     {
         $respuesta = new Respuesta();
-        $dataInsert = new PersonaModel();
-        $dataInsert = PersonaModel::find($id);
-        $dataInsert->Nombre = $request->Nombre;
-        $dataInsert->id = $id;
-        $dataInsert->Apellido_P = $request->Apellido_P;
-        $dataInsert->Apellido_M = $request->Apellido_M;
-        $dataInsert->Apellido_M = $request->Apellido_M;
-        $dataInsert->Nacimiento = $request->Nacimiento;
-        $dataInsert->Sexo = $request->Sexo;
-        if ($request->has(["Nombre", "Apellido_P", "Nacimiento", "Sexo"])) {
-            if ($dataInsert->save()) {
-                $respuesta->Code = 202;
-                $respuesta->CodeDesc = HttpCode::getMessageForCode(202);
-                $respuesta->Data =  $dataInsert;
-                $respuesta->IsSuccess = true;
-                $respuesta->Message = "Actualizacion exitosa";
+        try {
+            $rules = [
+                'Nombre' => 'required',
+                'Apellido_P' => 'required',
+                'Nacimiento' => 'required',
+                'Sexo' => 'required|size:1',
+            ];
+            $validator = Validator($request->all(), $rules);
+            $validator->errors()->toArray();
+            if (!$validator->fails()) {
+                $dataInsert = new PersonaModel();
+                $dataInsert = PersonaModel::find($id);
+                $dataInsert->Nombre = $request->Nombre;
+                $dataInsert->id = $id;
+                $dataInsert->Apellido_P = $request->Apellido_P;
+                $dataInsert->Apellido_M = $request->Apellido_M;
+                $dataInsert->Apellido_M = $request->Apellido_M;
+                $dataInsert->Nacimiento = $request->Nacimiento;
+                $dataInsert->Sexo = $request->Sexo;
+                $response = $dataInsert->save();
+                $respuesta->RespuestaUpdate($response, $dataInsert);
             } else {
-                $respuesta->Code = 501;
-                $respuesta->CodeDesc = HttpCode::getMessageForCode(501);;
-                $respuesta->Data = null;
-                $respuesta->IsSuccess = true;
-                $respuesta->Message = "Error al actualizar";
+                $respuesta->RespuestaDatosIncompletos($validator->errors());
             }
-        } else {
-            $respuesta->Code = 406;
-            $respuesta->CodeDesc = HttpCode::getMessageForCode(406);;
-            $respuesta->Data = $dataInsert;
-            $respuesta->IsSuccess = true;
-            $respuesta->Message = "Datos insuficientes";
+        } catch (Exception $e) {
+            $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+        return $respuesta->toJson();
     }
+    /**
+     * Eliminar persona de la base de datos
+     * @param int $id Id de la persona
+     */
     function delete($id)
     {
         $respuesta = new Respuesta();
-        $dataInsert =   PersonaModel::find($id);
-        $dataInsert = new PersonaModel();
-        $execute = $dataInsert->eliminar($id);
-        if ($execute > 0) {
-            $respuesta->Code = 202;
-            $respuesta->CodeDesc = HttpCode::getMessageForCode(202);
-            $respuesta->Data =  $execute;
-            $respuesta->IsSuccess = true;
-            $respuesta->Message = "Eliminacion exitosa";
-        } else {
-            $respuesta->Code = 204;
-            $respuesta->CodeDesc = HttpCode::getMessageForCode(204);;
-            $respuesta->Data = null;
-            $respuesta->IsSuccess = true;
-            $respuesta->Message = "Error al eliminar";
+        try {
+            $data = PersonaModel::findOrFail($id);
+            $data->id = $id;
+            $response = $data->delete();
+            $respuesta->RespuestaDelete($response, $data);
+        } catch (Exception $e) {
+            $respuesta->RespuestaBadRequest(null, $e);
         }
-
-
-        return response(json_encode($respuesta));
+        return $respuesta->toJson();
     }
 }

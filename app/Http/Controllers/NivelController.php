@@ -12,6 +12,9 @@ use Exception;
 
 class NivelController extends BaseController
 {
+    /**
+     * Obtener los niveles de usuario (que administran el sistema)
+     */
     public function getAll()
     {
         $respuesta = new Respuesta();
@@ -21,8 +24,12 @@ class NivelController extends BaseController
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+  return $respuesta->toJson();
     }
+    /**
+     * Obtener Nivel de usuario (que administra el sistema )
+     * @param  int $id Id del Nivel de usuario
+     */
     public function get($id)
     {
         $respuesta = new Respuesta();
@@ -32,6 +39,6 @@ class NivelController extends BaseController
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+  return $respuesta->toJson();
     }
 }

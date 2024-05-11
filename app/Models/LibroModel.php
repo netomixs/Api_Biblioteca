@@ -33,6 +33,10 @@ class LibroModel extends Model
     }
     public function prestamo()
     {
-        return $this->hasOne(PrestamoModel::class, 'Id_Lector', 'Id');
+        return $this->hasMany(PrestamoModel::class, 'Id_Libro', 'Id');
+    }
+    public function editorial()
+    {
+        return $this->belongsTo(EditorialModel::class, 'Id_Editorial', "Id");
     }
 }

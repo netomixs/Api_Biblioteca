@@ -2,7 +2,7 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
-use App\Http\Controllers\LibroController;
+ 
 
 /*
 |--------------------------------------------------------------------------
@@ -38,8 +38,10 @@ $router->delete("/persona/{id}","PersonaController@delete");
 $router->get("/nivel","NivelController@getAll");
 $router->get("/nivel","NivelController@get");
 //Usuario
+$router->post("/login","UsuarioController@login");
 $router->get("/usuario","UsuarioController@getAll");
 $router->get("/usuario/{id}","UsuarioController@get");
+
 $router->post("/usuario","UsuarioController@insert");
 $router->post("/usuario/{id}","UsuarioController@update");
 $router->post("/usuario/{id}/password","UsuarioController@updatePassword");
@@ -66,6 +68,7 @@ $router->delete("/tipo/{id}","TipoController@delete");
 //Libro
 $router->get("/libro","LibroController@getAll");
 $router->get("/libro/{id}","LibroController@get");
+$router->get("/libro/{id}/prestamos","LibroController@getWhitPrestamos");
 $router->post("/libro","LibroController@insert");
 $router->post("/libro/{id}","LibroController@update");
 $router->post("/libro/{id}/image","LibroController@updateImage");
@@ -73,6 +76,7 @@ $router->delete("/libro/{id}","LibroController@delete");
 //Lector
 $router->get("/lector","LectorController@getAll");
 $router->get("/lector/{id}","LectorController@get");
+$router->get("/lector/{id}/prestamo","LectorController@getWithPrestamos");
 $router->post("/lector","LectorController@insert");
 $router->post("/lector/{id}","LectorController@update");
 $router->delete("/lector/{id}","LectorController@delete");

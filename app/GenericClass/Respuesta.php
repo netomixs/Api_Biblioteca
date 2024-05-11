@@ -121,6 +121,6 @@ class Respuesta
     }
     public function toJson()
     {
-        return json_encode($this);
+        return json_encode($this,JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
     }
 }

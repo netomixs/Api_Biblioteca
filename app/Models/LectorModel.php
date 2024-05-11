@@ -16,6 +16,6 @@ class LectorModel extends Model
         return $this->belongsTo(PersonaModel::class, 'Id_Persona', "Id");
     }
    public function prestamo(){
-    return $this->hasOne(PrestamoModel::class, 'Id_Lector','Id');
+    return $this->hasMany(PrestamoModel::class, 'Id_Lector','Id');
    }
 }

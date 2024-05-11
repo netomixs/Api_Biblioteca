@@ -14,6 +14,10 @@ use Exception;
 
 class AutorController extends BaseController
 {
+    /** 
+     * Se obtiene una lista de todos los autores
+     * 
+    */
     public function getAll()
     {
         $respuesta = new Respuesta();
@@ -24,8 +28,12 @@ class AutorController extends BaseController
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+        return $respuesta->toJson();
     }
+    /**
+     * Datos del autor
+     * @param int $id Id del autor
+     */
     public function get($id)
     {
         $respuesta = new Respuesta();
@@ -35,8 +43,12 @@ class AutorController extends BaseController
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+        return $respuesta->toJson();
     }
+        /**
+     * Datos del autor con datos de la persona asociada
+     * @param int $id Id del autor
+     */
     public function getWithPerson($id)
     {
         $respuesta = new Respuesta();
@@ -46,8 +58,12 @@ class AutorController extends BaseController
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+        return $respuesta->toJson();
     }
+       
+    /**
+     *Lista de los datos de los autores con la persona asociada 
+     */
     public function getAllWithPerson()
     {
         $respuesta = new Respuesta();
@@ -58,8 +74,12 @@ class AutorController extends BaseController
             $respuesta->RespuestaBadRequest(null, $e);
         }
 
-        return response(json_encode($respuesta));
+        return $respuesta->toJson();
     }
+    /**
+     * Insercion en la tabla autor es necesario contar con una persona resgitrada previemente
+     * @param Request $request {Id_Persona, Codigo}
+     */
     public function insert(Request $request)
     {
         $respuesta = new Respuesta();
@@ -81,8 +101,12 @@ class AutorController extends BaseController
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+        return $respuesta->toJson();
     }
+    /**
+     * @param Request $request {Codigo}
+     * @param  int $id Id del registro afectado
+     */
     public function update(Request $request, $id)
     {
         $respuesta = new Respuesta();
@@ -103,8 +127,11 @@ class AutorController extends BaseController
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+        return $respuesta->toJson();
     }
+    /**
+     * @param int $id id del autor. Borra la persona relacionada
+     */
     public function delete($id)
     {
         $respuesta = new Respuesta();
@@ -118,8 +145,12 @@ class AutorController extends BaseController
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+        return $respuesta->toJson();
     }
+    /**
+     * Lista de los libros escritos por el autor
+     * @param int $id Id del autor
+     */
     public function getLibros($id)
     {
         $respuesta = new Respuesta();
@@ -130,6 +161,6 @@ class AutorController extends BaseController
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+        return $respuesta->toJson();
     }
 }

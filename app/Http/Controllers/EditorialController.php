@@ -12,6 +12,9 @@ use Illuminate\Validation\Validator;
 
 class EditorialController extends BaseController
 {
+    /**
+     * Lista de todas las editoriales registradas
+     */
     public function getAll()
     {
         $respuesta = new Respuesta();
@@ -23,19 +26,26 @@ class EditorialController extends BaseController
         }
         return $respuesta->toJson();
     }
-
+    /**
+     * Datos del editorial y que libros tiene
+     * @param int $id Id del editorial
+     */
     public function get($id)
     {
         $respuesta = new Respuesta();
         try {
-            $data = EditorialModel::find($id);
+           // $data = EditorialModel::find($id);
+           $data = EditorialModel::with("libros")->findOrFail($id);
             $respuesta->RespuestaGet($data);
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
         return $respuesta->toJson();
     }
-
+    /**
+     * Insertar editorial en la base de datos
+     * @param Request $request {Nombre,Pais}
+     */
     public function insert(Request $request)
     {
         $respuesta = new Respuesta();
@@ -54,14 +64,17 @@ class EditorialController extends BaseController
                 $response = $data->save();
                 $respuesta->RespuestaInsert($response, $data->id);
             } else {
-                $respuesta->RespuestaDatosIncompletos($validator->errors() );
+                $respuesta->RespuestaDatosIncompletos($validator->errors());
             }
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
         return $respuesta->toJson();
     }
-
+    /**
+     * @param Request $request {Nombre,Pais}
+     * @param  int $id Id de la editorial
+     */
     public function update(Request $request, $id)
     {
         $respuesta = new Respuesta();
@@ -71,7 +84,7 @@ class EditorialController extends BaseController
                 'Pais' => 'required|min:6',
             ];
             $validator = Validator($request->all(), $rules);
-          //  if ($request->has(["Nombre", "Pais"])) {
+            //  if ($request->has(["Nombre", "Pais"])) {
             if (!$validator->fails()) {
                 $data = EditorialModel::findOrFail($id);
                 $data->Nombre = $request->Nombre;
@@ -87,7 +100,10 @@ class EditorialController extends BaseController
         }
         return $respuesta->toJson();
     }
-
+    /**
+     * Borra editorial de la base de datos
+     * @param int $id Id de la editorial
+     */
     public function delete($id)
     {
         $respuesta = new Respuesta();

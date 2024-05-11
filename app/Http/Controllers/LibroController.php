@@ -12,37 +12,82 @@ use App\Models\LibroModel;
 class LibroController extends BaseController
 {
 
-
+    /**
+     * Obtener una lista de los libro de la base de datos con genero, autor con datos de la persona y el tipo de libro
+     */
     public function getAll()
     {
         $respuesta = new Respuesta();
         try {
-           
-            $data = LibroModel::with(["genero","autor.persona","tipo"])->get();
+
+            $data = LibroModel::with(["genero", "autor.persona", "tipo"])->get();
             $respuesta->RespuestaGet($data);
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
         return $respuesta->toJson();
     }
+    /**
+     * Obtener libro con genero y datos del autor con persona
+     * @param  int $id id del libro
+     */
     public function get($id)
     {
         $respuesta = new Respuesta();
         try {
-            $data = LibroModel::with("genero","autor.persona")->find($id);
+            $data = LibroModel::with("genero", "autor.persona")->find($id);
             $respuesta->RespuestaGet($data);
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
         return $respuesta->toJson();
     }
+        /**
+     * Obtener prestamos por libro
+     * @param  int $id id del libro
+     */
+    public function getWhitPrestamos($id)
+    {
+        $respuesta = new Respuesta();
+        try {
+            $data = LibroModel::with("prestamo")->find($id);
+            $respuesta->RespuestaGet($data);
+        } catch (Exception $e) {
+            $respuesta->RespuestaBadRequest(null, $e);
+        }
+        return $respuesta->toJson();
+    }
+    /**
+     * Insertar libro en la base de datos
+     * @param  Request $request{ISBN,Titulo,Descripcion,Descripcion,Fecha_Publicacion,
+     * Feha_Adquicicion,Existencias,Es_Prestable,Imagen,Id_Tipo,Id_Editorial,Codigo,Id_Genero,Id_Autor}
+     * Imagen puede ser un string o un archivo de imagen
+     */
     public function insert(Request $request)
     {
         $respuesta = new Respuesta();
-        $data = new LibroModel();
-        try {
-            if ($request->has(["ISBN", "Titulo", "Descripcion", "Fecha_Publicacion", "Feha_Adquicicion", "Existencias", "Es_Prestable", "Imagen", "Id_Tipo", "Id_Editorial", "Codigo", "Id_Genero", "Id_Autor"])) {
 
+        try {
+            $rules = [
+                'ISBN' => 'required|string|size:13',
+                'Titulo' => 'required|string|max:255',
+                'Descripcion' => 'required|string',
+                'Fecha_Publicacion' => 'required|date',
+                'Feha_Adquicicion' => 'required|date',
+                'Existencias' => 'required|integer',
+                'Es_Prestable' => 'required|boolean',
+                'Imagen' => 'required',
+                'Id_Tipo' => 'required|integer',
+                'Id_Editorial' => 'required|integer',
+                'Codigo' => 'required|string',
+                'Id_Genero' => 'required|integer',
+                'Id_Autor' => 'required|integer',
+
+            ];
+            $validator = Validator($request->all(), $rules);
+            $validator->errors()->toArray();
+            if (!$validator->fails()) {
+                $data = new LibroModel();
                 if ($request->hasFile("Imagen")) {
                     $image = $request->file('Imagen');
                     $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
@@ -65,10 +110,9 @@ class LibroController extends BaseController
                 $response = $data->save();
                 $data->generoInsert()->attach($request->Id_Genero);
                 $data->autorInsert()->attach($request->Id_Autor);
-
                 $respuesta->RespuestaInsert($response, $data->id);
             } else {
-                $respuesta->RespuestaDatosIncompletos($request->all());
+                $respuesta->RespuestaDatosIncompletos($validator->errors());
             }
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
@@ -80,7 +124,24 @@ class LibroController extends BaseController
         $respuesta = new Respuesta();
         $data = new LibroModel();
         try {
-            if ($request->has(["ISBN", "Titulo", "Descripcion", "Fecha_Publicacion", "Feha_Adquicicion", "Existencias", "Es_Prestable", "Id_Tipo", "Id_Editorial", "Codigo", "Id_Genero", "Id_Autor"])) {
+            $rules = [
+                'ISBN' => 'required|string|size:13',
+                'Titulo' => 'required|string|max:255',
+                'Descripcion' => 'required|string',
+                'Fecha_Publicacion' => 'required|date',
+                'Feha_Adquicicion' => 'required|date',
+                'Existencias' => 'required|integer',
+                'Es_Prestable' => 'required|boolean',
+                'Id_Tipo' => 'required|integer',
+                'Id_Editorial' => 'required|integer',
+                'Codigo' => 'required|string',
+                'Id_Genero' => 'required|integer',
+                'Id_Autor' => 'required|integer',
+
+            ];
+            $validator = Validator($request->all(), $rules);
+            $validator->errors()->toArray();
+            if (!$validator->fails()) {
                 $data =  LibroModel::findOrFail($id);
                 $data->id = $id;
                 $data->ISBN = $request->ISBN;
@@ -105,34 +166,53 @@ class LibroController extends BaseController
         }
         return $respuesta->toJson();
     }
+    /**
+     * Actualiza la imagen de un libro especificado
+     * @param Request $request {Imagen}
+     * Imagen puede ser File o String
+     * @param  int $id Id del libro
+     */
     public function updateImage(Request $request, $id)
     {
         $respuesta = new Respuesta();
         $data = new LibroModel();
         try {
-            $data = LibroModel::findOrFail($id);
-            $data->id = $id;
-            if ($request->hasFile("Imagen")) {
-                $image = $request->file('Imagen');
-                $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
+            $rules = [
+                'Imagen' => 'required',
+            ];
+            $validator = Validator($request->all(), $rules);
+            $validator->errors()->toArray();
+            if (!$validator->fails()) {
+                $data = LibroModel::findOrFail($id);
+                $data->id = $id;
+                if ($request->hasFile("Imagen")) {
+                    $image = $request->file('Imagen');
+                    $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
 
-                $image->move('./uploads/imagenes', $imageName);
-                $origen = "./uploads/imagenes" . $data->Imagen;
-                if (file_exists($origen)) {
-                    unlink($origen);
+                    $image->move('./uploads/imagenes', $imageName);
+                    $origen = "./uploads/imagenes" . $data->Imagen;
+                    if (file_exists($origen)) {
+                        unlink($origen);
+                    }
+                    $data->Imagen = $imageName;
+                    $data->save();
+                    $respuesta->RespuestaUpdate(true, $data);
+                } else {
+                    $data->Imagen = $request->Imagen;
+                    $data->save();
+                    $respuesta->RespuestaUpdate(true, $data);
                 }
-                $data->Imagen = $imageName;
-                $data->save();
-                $respuesta->RespuestaUpdate(true, $data);
             } else {
-                $respuesta->RespuestaUpdate(false, $data);
+                $respuesta->RespuestaUpdate(false, $request->all());
             }
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
         return $respuesta->toJson();
     }
-
+    /**
+     * @param  int $id Elimina libro
+     */
     public function delete($id)
     {
         $respuesta = new Respuesta();
@@ -146,11 +226,10 @@ class LibroController extends BaseController
             if (file_exists($origen)) {
                 unlink($origen);
             }
-
             $respuesta->RespuestaDelete($isSucees, $data);
         } catch (Exception $e) {
             $respuesta->RespuestaBadRequest(null, $e);
         }
-        return response(json_encode($respuesta));
+  return $respuesta->toJson();
     }
 }

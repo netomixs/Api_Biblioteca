@@ -9,4 +9,9 @@ use Illuminate\Database\Eloquent\Model;
     public $timestamps = false;
 
     protected $table = 'editorial'; 
+    protected $primaryKey = 'Id';
+    public function libros()
+    {
+        return $this->hasMany(LibroModel::class, 'Id_Editorial','Id');
+    }
 }
